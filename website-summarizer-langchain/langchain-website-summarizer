@@ -1,0 +1,58 @@
+from langchain_groq import ChatGroq
+from langchain_core.prompts import ChatPromptTemplate
+from langchain_core.output_parsers import StrOutputParser
+from class_1.scraper import fetch_website_contents   # reuse ai-website-summarizer scraper code
+from pathlib import Path
+from dotenv import load_dotenv
+import gradio as gr
+
+BASE_DIR = Path(__file__).resolve().parents[2]
+load_dotenv(BASE_DIR / ".env")
+
+prompt = ChatPromptTemplate.from_template(            
+    "Give a short, friendly summary of this website:\n\n{website}")
+model = ChatGroq(
+    model="llama-3.3-70b-versatile",
+    temperature=0.3
+)
+parser = StrOutputParser()                             
+
+chain = prompt | model | parser                        
+
+def summarize(url):
+    try:
+        website_content = fetch_website_contents(url)
+
+        if not website_content:
+            return "Could not fetch content from this website."
+
+        return chain.invoke({
+            "website": website_content
+        })
+
+    except Exception as e:
+        return f"Error: {str(e)}"
+    
+# Gradio UI
+demo = gr.Interface(
+    fn=summarize,
+    inputs=gr.Textbox(
+        label="Website URL",
+        placeholder="https://anthropic.com"
+    ),
+    outputs=gr.Textbox(
+        label="Website Summary",
+        lines=8
+    ),
+    title="Website Summarizer",
+    description="Enter a website URL and get a short, friendly AI-generated summary.",
+    examples=[
+        ["https://anthropic.com"],
+        ["https://openai.com"],
+        ["https://www.python.org"]
+    ]
+)
+
+demo.launch(share=True)
+
+#print(summarize("https://anthropic.com"))
