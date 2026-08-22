@@ -86,18 +86,3 @@ Answer + Sources
 | python-dotenv | Environment variable management |
 
 ---
-
-## 📂 Project Structure
-
-```text
-AI_Scaler/
-│
-├── class_3/
-│   └── rag.py
-│
-├── data/
-│   └── sample.pdf
-│
-├── .env
-├── .gitignore
-└── README.md
